@@ -11,6 +11,13 @@ namespace AloneInTheDark
         private static int[,] map;
         private static int width;
         private static int height;
+        private static (int, int) playerPos;
+        private static (int, int) monsterPos;
+        private static (int, int) exitPos;
+        private static int monsterX;        
+        private static int monsterY;
+        private static int monsterDirection;
+
         private static void Main(string[] args)
         {
             System.Console.WriteLine("Welcome to Alone in the Dark!");
@@ -29,18 +36,24 @@ namespace AloneInTheDark
             height = Math.Max(4, int.Parse(dimensions[1]));
             map = new int[width, height];
             System.Console.WriteLine($"Map size set to {width}x{height}.");
-            var monsterPos = initializeMosnster();
-            var exitPos = initializeExit(monsterPos.Item1, monsterPos.Item2);
-            var playerPos = initializePlayer(monsterPos.Item1, monsterPos.Item2, exitPos.Item1, exitPos.Item2);
+            monsterPos = initializeMosnster();
+            exitPos = initializeExit(monsterPos.Item1, monsterPos.Item2);
+            playerPos = initializePlayer(monsterPos.Item1, monsterPos.Item2, exitPos.Item1, exitPos.Item2);
             System.Console.WriteLine(commands());
             while (true)
             {
                 // Display current positions (for debugging purposes, can be removed later)
-                // System.Console.WriteLine($"Player: ({playerPos.Item1}, {playerPos.Item2}) | Monster: ({monsterPos.Item1}, {monsterPos.Item2}) | Exit: ({exitPos.Item1}, {exitPos.Item2})");
+                System.Console.WriteLine($"Player: ({playerPos.Item1}, {playerPos.Item2}) | Monster: ({monsterPos.Item1}, {monsterPos.Item2}) | Exit: ({exitPos.Item1}, {exitPos.Item2})");
+
                 if (nearExit(playerPos.Item1, playerPos.Item2, exitPos.Item1, exitPos.Item2))
                 {
                     System.Console.WriteLine("You sense that the exit is very close!");
                 }
+                if (nearMonster(playerPos.Item1, playerPos.Item2, monsterPos.Item1, monsterPos.Item2))
+                {
+                    System.Console.WriteLine("You smell something foul.");
+                }
+
                 System.Console.Write("Enter your move: ");
                 string input = System.Console.ReadLine().ToUpper();
                 if (input == "HELP")
@@ -85,9 +98,9 @@ namespace AloneInTheDark
                     continue;
                 }
                 // Move monster
-                int monsterDirection = monster(false);
-                int monsterX = monsterPos.Item1;
-                int monsterY = monsterPos.Item2;
+                monsterDirection = monster(attackPlayer(playerPos.Item1, playerPos.Item2, monsterPos.Item1, monsterPos.Item2));
+                monsterX = monsterPos.Item1;
+                monsterY = monsterPos.Item2;
                 switch (monsterDirection)
                 {
                     case 0: // North
@@ -110,7 +123,12 @@ namespace AloneInTheDark
                     System.Console.WriteLine("Congratulations! You've found the exit! You win!");
                     break;
                 }
+                if (playerPos == monsterPos)
+                {
+                    System.Console.WriteLine("The monster has caught you! Game over.");
+                    break;
 
+                }
             }
         }
 
@@ -168,18 +186,40 @@ namespace AloneInTheDark
 
         static int monster(bool x)
         {
+            int direction;
             //bool x is true if the monster is to move towards the player
-            //monster direction
+            //monster moves randomly if x is false
+            //returns an int representing the direction the monster will move
+            //Directions N=0, S=1, E=2, W=3, X=4 (on player)
             if (!x)
             {
-                int direction;
                 do
                 {
                     direction = new Random().Next(0, 4);
                 } while (!viableMove(direction));
                 return direction;
             }
-            return 0;
+            else
+            {
+                if (playerPos.Item1 == monsterPos.Item1 && playerPos.Item2 > monsterPos.Item2)
+                {
+                    return 1;
+                }
+                else if (playerPos.Item1 == monsterPos.Item1 && playerPos.Item2 < monsterPos.Item2)
+                {
+                    return 3;
+                }
+                else if (playerPos.Item2 == monsterPos.Item2 && playerPos.Item1 > monsterPos.Item1)
+                {
+                    return 0;
+                }
+                else if (playerPos.Item2 == monsterPos.Item2 && playerPos.Item1 < monsterPos.Item1)
+                {
+                    return 2;
+                }
+            }
+            //assumes monster is on player
+            return 4;
 
         }
 
@@ -222,12 +262,43 @@ namespace AloneInTheDark
             //check if player is near exit
             //x and y are the players current position
             //xx and yy are the exit position
-            if (y == yy + 1 || y == yy - 1 || x == xx + 1 || x == xx - 1)
+            if (Math.Abs(x - xx) <= 1 && Math.Abs(y - yy) <= 1 && !(x == xx && y == yy))
             {
                 return true;
             }
             return false;
         }
 
+        static bool nearMonster(int x, int y, int mx, int my)
+        {
+            //check if player is near monster within 3 spaces
+            //x and y are the players current position
+            //mx and my are the monster position
+            if (x == mx && Math.Abs(y - my) <= 3)
+            {
+                return true;
+            }
+            else if (y == my && Math.Abs(x - mx) <= 3)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        static bool attackPlayer(int x, int y, int mx, int my)
+        {
+            //check if monster is near player
+            //x and y are the players current position
+            //mx and my are the monster position
+            if (x == mx && Math.Abs(y-my) <= 2)
+            {
+                return true;
+            }
+            else if (y == my && Math.Abs(x-mx) <= 2)
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }
