@@ -45,7 +45,7 @@ namespace AloneInTheDark
             {
                 Console.WriteLine("--------------------------------------------------------------------");
                 // Display current positions (for debugging purposes, can be removed later)
-                Console.WriteLine($"Player: ({playerPos.Item1}, {playerPos.Item2}) | Monster: ({monsterPos.Item1}, {monsterPos.Item2}) | Exit: ({exitPos.Item1}, {exitPos.Item2})");
+                //Console.WriteLine($"Player: ({playerPos.Item1}, {playerPos.Item2}) | Monster: ({monsterPos.Item1}, {monsterPos.Item2}) | Exit: ({exitPos.Item1}, {exitPos.Item2})");
                 if (NearExit(playerPos.Item1, playerPos.Item2, exitPos.Item1, exitPos.Item2))
                 {
                     Console.WriteLine("You sense that the exit is very close!");
@@ -132,7 +132,7 @@ namespace AloneInTheDark
                         break;
                     case 4: // on player
                         //for debugging puporses
-                        Console.WriteLine("switch mon-dir is case 4");
+                        //Console.WriteLine("switch mon-dir is case 4");
                         break;
                 }
                 monsterPos = (monsterRow, monsterColumn);
@@ -206,7 +206,7 @@ namespace AloneInTheDark
                 } while (!ViableMove((direction), (monsterPos.Item1, monsterPos.Item2)));
                 return direction;
             }
-            Console.WriteLine("monster is chasing you");
+            //Console.WriteLine("monster is chasing you");
             int diagY = playerPos.Item1 - monsterPos.Item1;
             int diagX = playerPos.Item2 - monsterPos.Item2;
             //if player is right, move E
